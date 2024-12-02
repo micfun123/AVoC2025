@@ -1,40 +1,48 @@
-input_data = open("test.txt", "r")
+input_data = open("in.txt", "r")
+
 data = input_data.read().split('\n')
 
 total_safe = 0
 
 def check_row(row):
-    direction_of_change = []
+    
+    direction = None
+    print(row) 
     for j in range(1, len(row)):
-        out = int(row[j]) - int(row[j-1])
-        if out < 0:
-            direction_of_change.append("down")
-        elif out > 0:
-            direction_of_change.append("up")
+        diff = int(row[j]) - int(row[j - 1])
+
         
-        
-        if abs(int(row[j]) - int(row[j-1])) > 3 or (int(row[j]) - int(row[j-1])) == 0:
-            return False, j 
-        
-    
-    for k in range(len(direction_of_change) - 1):
-        if direction_of_change[k] != direction_of_change[k+1]:
-            return False, k + 1  
-    
-    return True, None  
+        if diff == 0 or abs(diff) > 3:
+            return False, j
+
+        if direction is None:
+            direction = "up" if diff > 0 else "down"
+        else:
+            if (direction == "up" and diff < 0) or (direction == "down" and diff > 0):
+                return False, j
+
+    return True, None
+
+
+def has_discrepancy(row):
+    for i in range(len(row)):
+        modified_row = row[:i] + row[i+1:]
+        safe, _ = check_row(modified_row)
+        if safe:
+            return True
+    return False
 
 
 for i in data:
     row = i.split(" ")  
     row = list(map(int, row)) 
     
-    
-    safe, fail_index = check_row(row)
-    
+    safe, _ = check_row(row)
     if not safe:
-        modified_row = row[:fail_index] + row[fail_index+1:]
-        safe, _ = check_row(modified_row)
-    
+        safe = has_discrepancy(row)
+
+
+
     print(safe) 
     if safe:
         total_safe += 1
